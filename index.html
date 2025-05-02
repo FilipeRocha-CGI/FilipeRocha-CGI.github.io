@@ -28,10 +28,6 @@
             maxDetectionRate: 60;
             trackingMethod: best;
             cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/camera_para.dat;
-            planeDetection: true;
-            planeDetectionMode: horizontal;
-            planeDetectionEnabled: true;
-            planeDetectionUpdateRate: 60;
         "
         renderer="
             logarithmicDepthBuffer: true;
@@ -41,11 +37,17 @@
         "
     >
         <a-camera gps-camera rotation-reader></a-camera>
+        
+        <!-- Debug marker for testing -->
+        <a-marker preset="hiro">
+            <a-box position="0 0.5 0" material="color: yellow; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
+        </a-marker>
+
+        <!-- Debug plane -->
         <a-entity id="debug-plane" 
             geometry="primitive: plane; width: 1; height: 1" 
             material="color: #7BC8A4; opacity: 0.5; side: double" 
             visible="false"
-            ar-hit-test="enabled: true;"
         ></a-entity>
     </a-scene>
     <div id="debug-info"></div>
