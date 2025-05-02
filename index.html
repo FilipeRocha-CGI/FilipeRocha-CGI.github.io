@@ -8,10 +8,24 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.1/aframe/build/aframe-ar.js"></script>
 </head>
 <body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+    <a-scene 
+        embedded 
+        arjs="
+            sourceType: webcam;
+            debugUIEnabled: true;
+            detectionMode: mono_and_matrix;
+            matrixCodeType: 3x3;
+            sourceWidth: 1280;
+            sourceHeight: 720;
+            displayWidth: 1280;
+            displayHeight: 720;
+        "
+        renderer="logarithmicDepthBuffer: true;"
+    >
         <a-camera gps-camera rotation-reader></a-camera>
         <a-entity id="debug-plane" geometry="primitive: plane; width: 1; height: 1" material="color: #7BC8A4; opacity: 0.5; side: double" visible="false"></a-entity>
     </a-scene>
