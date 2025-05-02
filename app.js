@@ -19,19 +19,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Check camera access
+    // Check camera access and set quality
     async function checkCameraAccess() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            updateDebugInfo(null, 'Camera access granted');
-            stream.getTracks().forEach(track => track.stop()); // Stop the stream after checking
+            const constraints = {
+                video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    facingMode: { ideal: 'environment' },
+                    zoom: { ideal: 1 }
+                }
+            };
+
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            const videoTrack = stream.getVideoTracks()[0];
+            const capabilities = videoTrack.getCapabilities();
+            const settings = videoTrack.getSettings();
+
+            // Log camera capabilities for debugging
+            console.log('Camera capabilities:', capabilities);
+            console.log('Camera settings:', settings);
+
+            updateDebugInfo(null, `Camera access granted (${settings.width}x${settings.height})`);
+            
+            // Clean up
+            stream.getTracks().forEach(track => track.stop());
         } catch (error) {
             updateDebugInfo(null, `Camera access error: ${error.message}`);
         }
     }
 
+    // Handle device-specific optimizations
+    function optimizeForDevice() {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+        if (isMobile) {
+            // Adjust scene settings for mobile devices
+            scene.setAttribute('renderer', {
+                ...scene.getAttribute('renderer'),
+                precision: isIOS ? 'highp' : 'mediump',
+                maxCanvasWidth: 1920,
+                maxCanvasHeight: 1080
+            });
+        }
+    }
+
     // Listen for scene loaded event
     scene.addEventListener('loaded', () => {
+        optimizeForDevice();
         checkCameraAccess();
     });
 

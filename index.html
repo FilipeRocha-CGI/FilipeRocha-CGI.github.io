@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>WebAR Plane Detection</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
@@ -19,12 +21,20 @@
             debugUIEnabled: true;
             detectionMode: mono_and_matrix;
             matrixCodeType: 3x3;
-            sourceWidth: 1280;
-            sourceHeight: 720;
-            displayWidth: 1280;
-            displayHeight: 720;
+            sourceWidth: 1920;
+            sourceHeight: 1080;
+            displayWidth: 1920;
+            displayHeight: 1080;
+            maxDetectionRate: 60;
+            trackingMethod: best;
+            cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/camera_para.dat;
         "
-        renderer="logarithmicDepthBuffer: true;"
+        renderer="
+            logarithmicDepthBuffer: true;
+            precision: highp;
+            antialias: true;
+            alpha: true;
+        "
     >
         <a-camera gps-camera rotation-reader></a-camera>
         <a-entity id="debug-plane" geometry="primitive: plane; width: 1; height: 1" material="color: #7BC8A4; opacity: 0.5; side: double" visible="false"></a-entity>
