@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const scene = document.querySelector('a-scene');
     const debugPlane = document.getElementById('debug-plane');
+    const arPlane = document.getElementById('ar-plane');
     const debugInfo = document.getElementById('debug-info');
 
     // Function to update debug information
-    function updateDebugInfo(plane, cameraStatus = '', markerStatus = '') {
+    function updateDebugInfo(plane, cameraStatus = '', markerStatus = '', planeStatus = '') {
         if (plane) {
             const position = plane.object3D.position;
             const rotation = plane.object3D.rotation;
@@ -12,13 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
             debugInfo.innerHTML = `
                 ${cameraStatus}<br>
                 ${markerStatus}<br>
+                ${planeStatus}<br>
                 Plane Detected!<br>
                 Position: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)})<br>
                 Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})<br>
                 Scale: (${scale.x.toFixed(2)}, ${scale.y.toFixed(2)}, ${scale.z.toFixed(2)})
             `;
         } else {
-            debugInfo.innerHTML = `${cameraStatus}<br>${markerStatus}<br>No plane detected. Move your device around to find surfaces.`;
+            debugInfo.innerHTML = `${cameraStatus}<br>${markerStatus}<br>${planeStatus}<br>No plane detected. Move your device around to find surfaces.`;
         }
     }
 
@@ -43,12 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Camera capabilities:', capabilities);
             console.log('Camera settings:', settings);
 
-            updateDebugInfo(null, `Camera access granted (${settings.width}x${settings.height})`, '');
+            updateDebugInfo(null, `Camera access granted (${settings.width}x${settings.height})`, '', '');
             
             // Clean up
             stream.getTracks().forEach(track => track.stop());
         } catch (error) {
-            updateDebugInfo(null, `Camera access error: ${error.message}`, '');
+            updateDebugInfo(null, `Camera access error: ${error.message}`, '', '');
         }
     }
 
@@ -73,15 +75,28 @@ document.addEventListener('DOMContentLoaded', () => {
         // Listen for marker events
         scene.addEventListener('markerFound', (event) => {
             const marker = event.detail.target;
-            updateDebugInfo(null, '', 'Marker detected!');
+            updateDebugInfo(null, '', 'Marker detected!', '');
             
             // When marker is found, try to detect planes
             detectPlanes(marker);
         });
 
         scene.addEventListener('markerLost', () => {
-            updateDebugInfo(null, '', 'Marker lost');
+            updateDebugInfo(null, '', 'Marker lost', '');
             debugPlane.setAttribute('visible', 'false');
+            arPlane.setAttribute('visible', 'false');
+        });
+
+        // Listen for plane detection events
+        scene.addEventListener('ar-hit-test', (event) => {
+            const hitTestResults = event.detail;
+            if (hitTestResults.length > 0) {
+                const hit = hitTestResults[0];
+                arPlane.setAttribute('visible', 'true');
+                arPlane.object3D.position.copy(hit.point);
+                arPlane.object3D.rotation.copy(hit.rotation);
+                updateDebugInfo(arPlane, '', '', 'AR Plane detected!');
+            }
         });
     }
 
@@ -99,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Adjust plane position to be on the surface
         debugPlane.object3D.position.y = 0;
         
-        updateDebugInfo(debugPlane, '', 'Marker detected!');
+        updateDebugInfo(debugPlane, '', 'Marker detected!', '');
     }
 
     // Listen for scene loaded event
@@ -110,5 +125,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial debug message
-    updateDebugInfo(null, 'Initializing...', '');
+    updateDebugInfo(null, 'Initializing...', '', '');
 }); 

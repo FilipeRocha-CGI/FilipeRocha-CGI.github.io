@@ -28,6 +28,9 @@
             maxDetectionRate: 60;
             trackingMethod: best;
             cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/camera_para.dat;
+            trackingBackend: artoolkit;
+            patternRatio: 0.5;
+            patternUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/patt.hiro;
         "
         renderer="
             logarithmicDepthBuffer: true;
@@ -47,6 +50,13 @@
         <a-entity id="debug-plane" 
             geometry="primitive: plane; width: 1; height: 1" 
             material="color: #7BC8A4; opacity: 0.5; side: double" 
+            visible="false"
+            ar-hit-test="enabled: true;"
+        ></a-entity>
+
+        <!-- AR plane detection -->
+        <a-entity id="ar-plane" 
+            ar-plane="enabled: true; type: horizontal;"
             visible="false"
         ></a-entity>
     </a-scene>
