@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})
             `;
         } else {
-            debugInfo.innerHTML = `${cameraStatus}<br>No marker detected. Show the Hiro marker to the camera.`;
+            debugInfo.innerHTML = `${cameraStatus}<br>No marker detected. Show the marker pattern to the camera.`;
         }
     }
 
@@ -200,16 +200,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listen for marker events
     scene.addEventListener('markerFound', (event) => {
+        console.log('Marker found event triggered');
         const marker = event.detail.target;
+        console.log('Marker details:', marker);
         updateDebugInfo(marker);
     });
 
     scene.addEventListener('markerLost', () => {
+        console.log('Marker lost event triggered');
         updateDebugInfo(null);
     });
 
     // Listen for scene loaded event
     scene.addEventListener('loaded', () => {
+        console.log('Scene loaded event triggered');
         optimizeForDevice();
         checkCameraAccess();
     });

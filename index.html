@@ -38,12 +38,16 @@
     >
         <a-camera gps-camera rotation-reader></a-camera>
         
-        <!-- Hiro Marker -->
-        <a-marker preset="hiro">
-            <a-box position="0 0.5 0" material="color: yellow; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
+        <!-- Simple Marker -->
+        <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/pattern-marker.patt">
+            <a-box position="0 0.5 0" material="color: red; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
         </a-marker>
     </a-scene>
     <div id="debug-info"></div>
+    <div id="marker-info">
+        <p>Marker Pattern:</p>
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/pattern-marker.patt" alt="Marker Pattern" style="width: 200px; height: 200px;">
+    </div>
     <script src="app.js"></script>
 </body>
 </html> 
