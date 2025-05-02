@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>WebAR Plane Detection</title>
+    <title>WebAR Marker Test</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
@@ -37,7 +37,11 @@
         "
     >
         <a-camera gps-camera rotation-reader></a-camera>
-        <a-entity id="debug-plane" geometry="primitive: plane; width: 1; height: 1" material="color: #7BC8A4; opacity: 0.5; side: double" visible="false"></a-entity>
+        
+        <!-- Hiro Marker -->
+        <a-marker preset="hiro">
+            <a-box position="0 0.5 0" material="color: yellow; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
+        </a-marker>
     </a-scene>
     <div id="debug-info"></div>
     <script src="app.js"></script>

@@ -134,22 +134,21 @@ function render() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const scene = document.querySelector('a-scene');
-    const debugPlane = document.getElementById('debug-plane');
     const debugInfo = document.getElementById('debug-info');
 
     // Function to update debug information
-    function updateDebugInfo(plane, cameraStatus = '') {
-        if (plane) {
-            const position = plane.object3D.position;
-            const rotation = plane.object3D.rotation;
+    function updateDebugInfo(marker, cameraStatus = '') {
+        if (marker) {
+            const position = marker.object3D.position;
+            const rotation = marker.object3D.rotation;
             debugInfo.innerHTML = `
                 ${cameraStatus}<br>
-                Plane Detected!<br>
+                Marker Detected!<br>
                 Position: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)})<br>
                 Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})
             `;
         } else {
-            debugInfo.innerHTML = `${cameraStatus}<br>No plane detected. Move your device around to find surfaces.`;
+            debugInfo.innerHTML = `${cameraStatus}<br>No marker detected. Show the Hiro marker to the camera.`;
         }
     }
 
@@ -199,17 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Listen for plane detection events
+    // Listen for marker events
     scene.addEventListener('markerFound', (event) => {
         const marker = event.detail.target;
-        debugPlane.setAttribute('visible', 'true');
-        debugPlane.object3D.position.copy(marker.object3D.position);
-        debugPlane.object3D.rotation.copy(marker.object3D.rotation);
-        updateDebugInfo(debugPlane);
+        updateDebugInfo(marker);
     });
 
     scene.addEventListener('markerLost', () => {
-        debugPlane.setAttribute('visible', 'false');
         updateDebugInfo(null);
     });
 
