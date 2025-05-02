@@ -7,9 +7,6 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>WebAR Marker Test</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.1/aframe/build/aframe-ar.js"></script>
 </head>
@@ -19,13 +16,12 @@
         arjs="
             sourceType: webcam;
             debugUIEnabled: true;
-            detectionMode: mono_and_matrix;
-            matrixCodeType: 3x3;
-            sourceWidth: 1920;
-            sourceHeight: 1080;
-            displayWidth: 1920;
-            displayHeight: 1080;
-            maxDetectionRate: 60;
+            detectionMode: mono;
+            sourceWidth: 1280;
+            sourceHeight: 720;
+            displayWidth: 1280;
+            displayHeight: 720;
+            maxDetectionRate: 30;
             trackingMethod: best;
             cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/camera_para.dat;
         "
@@ -36,17 +32,18 @@
             alpha: true;
         "
     >
-        <a-camera gps-camera rotation-reader></a-camera>
+        <!-- Use basic A-Frame camera for marker tracking -->
+        <a-camera></a-camera>
         
-        <!-- Simple Marker -->
-        <a-marker type="pattern" url="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/pattern-marker.patt">
-            <a-box position="0 0.5 0" material="color: red; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
+        <!-- Basic Marker -->
+        <a-marker preset="hiro">
+            <a-box position="0 0.5 0" material="color: red; opacity: 0.8" scale="0.5 0.5 0.5"></a-box>
         </a-marker>
     </a-scene>
     <div id="debug-info"></div>
     <div id="marker-info">
-        <p>Marker Pattern:</p>
-        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/pattern-marker.patt" alt="Marker Pattern" style="width: 200px; height: 200px;">
+        <p>Hiro Marker Pattern:</p>
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker Pattern" style="width: 200px; height: 200px;">
     </div>
     <script src="app.js"></script>
 </body>
