@@ -109,7 +109,7 @@
             <!-- Create a cube on top of the Hiro marker -->
             <a-marker preset="hiro" id="marker">
                 <a-box 
-                    position="0 0 0" 
+                    position="0 0.2 0" 
                     rotation="0 0 0" 
                     width="0.4" 
                     height="0.4" 
@@ -118,7 +118,7 @@
                     id="cube">
                 </a-box>
             </a-marker>
-            <a-entity camera="fov: 40; near: 1; far: 100; zoom: 1;"></a-entity>
+            <a-entity arjs-camera></a-entity>
         </a-scene>
     </div>
     <script>
