@@ -8,11 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (plane) {
             const position = plane.object3D.position;
             const rotation = plane.object3D.rotation;
+            const scale = plane.object3D.scale;
             debugInfo.innerHTML = `
                 ${cameraStatus}<br>
                 Plane Detected!<br>
                 Position: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)})<br>
-                Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})
+                Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})<br>
+                Scale: (${scale.x.toFixed(2)}, ${scale.y.toFixed(2)}, ${scale.z.toFixed(2)})
             `;
         } else {
             debugInfo.innerHTML = `${cameraStatus}<br>No plane detected. Move your device around to find surfaces.`;
@@ -65,24 +67,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Handle plane detection events
+    function setupPlaneDetection() {
+        // Listen for hit test results
+        scene.addEventListener('ar-hit-test', (event) => {
+            const hitTestResults = event.detail;
+            if (hitTestResults.length > 0) {
+                const hit = hitTestResults[0];
+                debugPlane.setAttribute('visible', 'true');
+                debugPlane.object3D.position.copy(hit.point);
+                debugPlane.object3D.rotation.copy(hit.rotation);
+                updateDebugInfo(debugPlane);
+            }
+        });
+
+        // Listen for plane detection events
+        scene.addEventListener('markerFound', (event) => {
+            const marker = event.detail.target;
+            debugPlane.setAttribute('visible', 'true');
+            debugPlane.object3D.position.copy(marker.object3D.position);
+            debugPlane.object3D.rotation.copy(marker.object3D.rotation);
+            updateDebugInfo(debugPlane);
+        });
+
+        scene.addEventListener('markerLost', () => {
+            debugPlane.setAttribute('visible', 'false');
+            updateDebugInfo(null);
+        });
+    }
+
     // Listen for scene loaded event
     scene.addEventListener('loaded', () => {
         optimizeForDevice();
         checkCameraAccess();
-    });
-
-    // Listen for plane detection events
-    scene.addEventListener('markerFound', (event) => {
-        const marker = event.detail.target;
-        debugPlane.setAttribute('visible', 'true');
-        debugPlane.object3D.position.copy(marker.object3D.position);
-        debugPlane.object3D.rotation.copy(marker.object3D.rotation);
-        updateDebugInfo(debugPlane);
-    });
-
-    scene.addEventListener('markerLost', () => {
-        debugPlane.setAttribute('visible', 'false');
-        updateDebugInfo(null);
+        setupPlaneDetection();
     });
 
     // Initial debug message
