@@ -1,13 +1,13 @@
 let scene, camera, renderer;
-let controller;
-let reticle;
-let planes = [];
 let debugInfo;
+let currentSession = null;
+let xrRefSpace = null;
 
+// Initialize the scene
 init();
 animate();
 
-function init() {
+async function init() {
     // Create scene
     scene = new THREE.Scene();
     
@@ -21,27 +21,6 @@ function init() {
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
     
-    // Add AR button
-    document.body.appendChild(THREE.ARButton.createButton(renderer, {
-        requiredFeatures: ['hit-test'],
-        optionalFeatures: ['dom-overlay'],
-        domOverlay: { root: document.body }
-    }));
-    
-    // Create controller
-    controller = renderer.xr.getController(0);
-    controller.addEventListener('select', onSelect);
-    scene.add(controller);
-    
-    // Create reticle
-    reticle = new THREE.Mesh(
-        new THREE.RingGeometry(0.05, 0.1, 32).rotateX(-Math.PI / 2),
-        new THREE.MeshBasicMaterial()
-    );
-    reticle.matrixAutoUpdate = false;
-    reticle.visible = false;
-    scene.add(reticle);
-    
     // Add lights
     const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
     light.position.set(0.5, 1, 0.25);
@@ -49,6 +28,10 @@ function init() {
     
     // Get debug info element
     debugInfo = document.getElementById('debug-info');
+    
+    // Setup AR button
+    const arButton = document.getElementById('ar-button');
+    arButton.addEventListener('click', startAR);
     
     // Handle window resize
     window.addEventListener('resize', onWindowResize);
@@ -60,58 +43,60 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-function onSelect() {
-    if (reticle.visible) {
-        const planeGeometry = new THREE.PlaneGeometry(1, 1);
-        const planeMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x7BC8A4,
-            transparent: true,
-            opacity: 0.5,
-            side: THREE.DoubleSide
-        });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.position.copy(reticle.position);
-        plane.rotation.copy(reticle.rotation);
-        scene.add(plane);
-        planes.push(plane);
-        
-        updateDebugInfo(plane);
-    }
-}
-
-function updateDebugInfo(plane) {
-    if (plane) {
-        const position = plane.position;
-        const rotation = plane.rotation;
-        debugInfo.innerHTML = `
-            Plane Detected!<br>
-            Position: (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)})<br>
-            Rotation: (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})
-        `;
-    } else {
-        debugInfo.innerHTML = 'No plane detected. Move your device around to find surfaces.';
-    }
-}
-
-function handlePlaneDetection() {
-    const session = renderer.xr.getSession();
-    if (!session) return;
-    
-    const referenceSpace = renderer.xr.getReferenceSpace();
-    const frame = renderer.xr.getFrame();
-    
-    if (frame) {
-        const hitTestResults = frame.getHitTestResults(referenceSpace);
-        if (hitTestResults.length > 0) {
-            const hit = hitTestResults[0];
-            const pose = hit.getPose(referenceSpace);
-            
-            reticle.visible = true;
-            reticle.matrix.fromArray(pose.transform.matrix);
-        } else {
-            reticle.visible = false;
+async function startAR() {
+    try {
+        // Check if WebXR is available
+        if (!navigator.xr) {
+            throw new Error('WebXR not supported');
         }
+
+        // Request AR session
+        const session = await navigator.xr.requestSession('immersive-ar', {
+            requiredFeatures: ['hit-test'],
+            optionalFeatures: ['dom-overlay'],
+            domOverlay: { root: document.body }
+        });
+
+        currentSession = session;
+        xrRefSpace = await session.requestReferenceSpace('local');
+
+        // Setup session
+        renderer.xr.setReferenceSpace(xrRefSpace);
+        renderer.xr.setSession(session);
+
+        // Add end session button
+        const endButton = document.createElement('button');
+        endButton.textContent = 'End AR';
+        endButton.style.position = 'fixed';
+        endButton.style.top = '20px';
+        endButton.style.right = '20px';
+        endButton.style.zIndex = '1000';
+        endButton.addEventListener('click', () => {
+            if (currentSession) {
+                currentSession.end();
+            }
+        });
+        document.body.appendChild(endButton);
+
+        // Update debug info
+        updateDebugInfo('AR session started. Move your device around to detect surfaces.');
+
+        // Handle session end
+        session.addEventListener('end', () => {
+            currentSession = null;
+            xrRefSpace = null;
+            endButton.remove();
+            updateDebugInfo('AR session ended.');
+        });
+
+    } catch (error) {
+        updateDebugInfo(`Error: ${error.message}`);
+        console.error('AR session error:', error);
     }
+}
+
+function updateDebugInfo(message) {
+    debugInfo.innerHTML = message;
 }
 
 function animate() {
@@ -119,6 +104,30 @@ function animate() {
 }
 
 function render() {
-    handlePlaneDetection();
+    if (currentSession) {
+        const frame = renderer.xr.getFrame();
+        if (frame) {
+            // Get hit test results
+            const hitTestResults = frame.getHitTestResults(xrRefSpace);
+            if (hitTestResults.length > 0) {
+                const hit = hitTestResults[0];
+                const pose = hit.getPose(xrRefSpace);
+                
+                // Create a plane at hit position
+                const planeGeometry = new THREE.PlaneGeometry(1, 1);
+                const planeMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x7BC8A4,
+                    transparent: true,
+                    opacity: 0.5,
+                    side: THREE.DoubleSide
+                });
+                const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.matrix.fromArray(pose.transform.matrix);
+                scene.add(plane);
+                
+                updateDebugInfo('Plane detected!');
+            }
+        }
+    }
     renderer.render(scene, camera);
 } 
