@@ -47,6 +47,8 @@
             border-radius: 5px;
             font-family: monospace;
             z-index: 1000;
+            max-width: 300px;
+            word-wrap: break-word;
         }
         .status {
             margin: 5px 0;
@@ -57,6 +59,11 @@
         .status.false {
             color: #F44336;
         }
+        .camera-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -65,6 +72,12 @@
         <div class="status" id="marker-status">Marker Found: <span>false</span></div>
         <div class="status" id="surface-status">Surface Found: <span>false</span></div>
         <div class="status" id="object-status">3D Object Loaded: <span>false</span></div>
+        <div class="camera-info">
+            <div>Camera Resolution: <span id="camera-res">1280x720</span></div>
+            <div>FOV: <span id="camera-fov">60°</span></div>
+            <div>Near/Far: <span id="camera-clip">0.01/100</span></div>
+            <div>Detection Rate: <span id="detection-rate">30fps</span></div>
+        </div>
     </div>
     <div id="ar-container">
         <a-scene 
@@ -91,7 +104,7 @@
                     id="cube">
                 </a-box>
             </a-marker>
-            <a-entity camera></a-entity>
+            <a-entity camera="fov: 60; near: 0.01; far: 100;"></a-entity>
         </a-scene>
     </div>
     <script>
@@ -126,6 +139,18 @@
             surfaceStatus.classList.add('true');
             surfaceStatus.classList.remove('false');
         });
+
+        // Update camera info periodically
+        setInterval(function() {
+            const camera = document.querySelector('[camera]');
+            if (camera) {
+                const fov = camera.getAttribute('camera').fov;
+                const near = camera.getAttribute('camera').near;
+                const far = camera.getAttribute('camera').far;
+                document.getElementById('camera-fov').textContent = `${fov}°`;
+                document.getElementById('camera-clip').textContent = `${near}/${far}`;
+            }
+        }, 1000);
     </script>
 </body>
 </html> 
