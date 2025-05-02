@@ -10,56 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.1/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/webxr/ARButton.js"></script>
 </head>
 <body>
-    <a-scene 
-        embedded 
-        arjs="
-            sourceType: webcam;
-            debugUIEnabled: true;
-            detectionMode: mono_and_matrix;
-            matrixCodeType: 3x3;
-            sourceWidth: 1920;
-            sourceHeight: 1080;
-            displayWidth: 1920;
-            displayHeight: 1080;
-            maxDetectionRate: 60;
-            trackingMethod: best;
-            cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/camera_para.dat;
-            trackingBackend: artoolkit;
-            patternRatio: 0.5;
-            patternUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/aframe/data/data/patt.hiro;
-        "
-        renderer="
-            logarithmicDepthBuffer: true;
-            precision: highp;
-            antialias: true;
-            alpha: true;
-        "
-    >
-        <a-camera gps-camera rotation-reader></a-camera>
-        
-        <!-- Debug marker for testing -->
-        <a-marker preset="hiro">
-            <a-box position="0 0.5 0" material="color: yellow; opacity: 0.5" scale="0.5 0.5 0.5"></a-box>
-        </a-marker>
-
-        <!-- Debug plane -->
-        <a-entity id="debug-plane" 
-            geometry="primitive: plane; width: 1; height: 1" 
-            material="color: #7BC8A4; opacity: 0.5; side: double" 
-            visible="false"
-            ar-hit-test="enabled: true;"
-        ></a-entity>
-
-        <!-- AR plane detection -->
-        <a-entity id="ar-plane" 
-            ar-plane="enabled: true; type: horizontal;"
-            visible="false"
-        ></a-entity>
-    </a-scene>
     <div id="debug-info"></div>
     <script src="app.js"></script>
 </body>
