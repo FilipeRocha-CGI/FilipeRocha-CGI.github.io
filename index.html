@@ -49,6 +49,7 @@
             z-index: 1000;
             max-width: 300px;
             word-wrap: break-word;
+            font-size: 12px;
         }
         .status {
             margin: 5px 0;
@@ -64,6 +65,14 @@
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
+        .camera-setting {
+            margin: 2px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .camera-setting span {
+            color: #4CC3D9;
+        }
     </style>
 </head>
 <body>
@@ -73,10 +82,15 @@
         <div class="status" id="surface-status">Surface Found: <span>false</span></div>
         <div class="status" id="object-status">3D Object Loaded: <span>false</span></div>
         <div class="camera-info">
-            <div>Camera Resolution: <span id="camera-res">1280x720</span></div>
-            <div>FOV: <span id="camera-fov">40°</span></div>
-            <div>Near/Far: <span id="camera-clip">1/100</span></div>
-            <div>Detection Rate: <span id="detection-rate">60fps</span></div>
+            <div class="camera-setting">Resolution: <span id="camera-res">1280x720</span></div>
+            <div class="camera-setting">FOV: <span id="camera-fov">40°</span></div>
+            <div class="camera-setting">Near/Far: <span id="camera-clip">1/100</span></div>
+            <div class="camera-setting">Detection Rate: <span id="detection-rate">60fps</span></div>
+            <div class="camera-setting">Aspect Ratio: <span id="camera-aspect">1.78</span></div>
+            <div class="camera-setting">Zoom: <span id="camera-zoom">1</span></div>
+            <div class="camera-setting">Position: <span id="camera-pos">0,0,0</span></div>
+            <div class="camera-setting">Rotation: <span id="camera-rot">0,0,0</span></div>
+            <div class="camera-setting">Projection Matrix: <span id="camera-proj">...</span></div>
         </div>
     </div>
     <div id="ar-container">
@@ -87,7 +101,7 @@
                   detectionMode: mono_and_matrix; 
                   matrixCodeType: 3x3; 
                   cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/camera_para.dat;
-                  maxDetectionRate: 30;
+                  maxDetectionRate: 60;
                   sourceWidth: 1280;
                   sourceHeight: 720;
                   displayWidth: 1280;
@@ -96,7 +110,7 @@
             <a-marker preset="hiro" id="marker">
                 <a-box 
                     position="0 0 0" 
-                    rotation="0  0" 
+                    rotation="0 0 0" 
                     width="0.4" 
                     height="0.4" 
                     depth="0.4"
@@ -104,7 +118,7 @@
                     id="cube">
                 </a-box>
             </a-marker>
-            <a-entity camera="fov: 40; near: 1; far: 100;"></a-entity>
+            <a-entity camera="fov: 40; near: 1; far: 100; zoom: 1;"></a-entity>
         </a-scene>
     </div>
     <script>
@@ -144,11 +158,40 @@
         setInterval(function() {
             const camera = document.querySelector('[camera]');
             if (camera) {
-                const fov = camera.getAttribute('camera').fov;
-                const near = camera.getAttribute('camera').near;
-                const far = camera.getAttribute('camera').far;
-                document.getElementById('camera-fov').textContent = `${fov}°`;
-                document.getElementById('camera-clip').textContent = `${near}/${far}`;
+                const cameraComponent = camera.getAttribute('camera');
+                const cameraObj = camera.object3D;
+                
+                // Update basic camera settings
+                document.getElementById('camera-fov').textContent = `${cameraComponent.fov}°`;
+                document.getElementById('camera-clip').textContent = `${cameraComponent.near}/${cameraComponent.far}`;
+                document.getElementById('camera-zoom').textContent = cameraComponent.zoom;
+                
+                // Update camera position and rotation
+                const pos = cameraObj.position;
+                const rot = cameraObj.rotation;
+                document.getElementById('camera-pos').textContent = 
+                    `${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}`;
+                document.getElementById('camera-rot').textContent = 
+                    `${(rot.x * 180/Math.PI).toFixed(2)}°, ${(rot.y * 180/Math.PI).toFixed(2)}°, ${(rot.z * 180/Math.PI).toFixed(2)}°`;
+                
+                // Update projection matrix
+                const projMatrix = cameraObj.projectionMatrix.elements;
+                document.getElementById('camera-proj').textContent = 'Matrix Loaded';
+                
+                // Log complete camera settings to console
+                console.log('Camera Settings:', {
+                    fov: cameraComponent.fov,
+                    near: cameraComponent.near,
+                    far: cameraComponent.far,
+                    zoom: cameraComponent.zoom,
+                    position: { x: pos.x, y: pos.y, z: pos.z },
+                    rotation: { 
+                        x: rot.x * 180/Math.PI, 
+                        y: rot.y * 180/Math.PI, 
+                        z: rot.z * 180/Math.PI 
+                    },
+                    projectionMatrix: projMatrix
+                });
             }
         }, 1000);
     </script>
