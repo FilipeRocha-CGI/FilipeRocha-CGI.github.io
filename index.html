@@ -1,199 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WebXR AR Experience</title>
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>P5js Playground</title>
+    <meta charset="utf-8" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai",
+          "@google/genai/": "https://esm.sh/@google/genai/",
+          "lit": "https://esm.sh/lit",
+          "lit/": "https://esm.sh/lit/",
+          "marked": "https://esm.sh/marked",
+          "marked/": "https://esm.sh/marked/",
+          "highlight.js": "https://esm.sh/highlight.js@^11.11.1",
+          "marked-highlight": "https://esm.sh/marked-highlight@^2.2.1"
         }
-        #ar-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        #debug-panel {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            z-index: 1000;
-            max-width: 300px;
-            word-wrap: break-word;
-            font-size: 12px;
-        }
-        .status {
-            margin: 5px 0;
-        }
-        .status.true {
-            color: #4CAF50;
-        }
-        .status.false {
-            color: #F44336;
-        }
-        .camera-info {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .camera-setting {
-            margin: 2px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .camera-setting span {
-            color: #4CC3D9;
-        }
-    </style>
-</head>
-<body>
-    <div id="loading">Initializing AR...</div>
-    <div id="debug-panel">
-        <div class="status" id="marker-status">Marker Found: <span>false</span></div>
-        <div class="status" id="surface-status">Surface Found: <span>false</span></div>
-        <div class="status" id="object-status">3D Object Loaded: <span>false</span></div>
-        <div class="camera-info">
-            <div class="camera-setting">Resolution: <span id="camera-res">1280x720</span></div>
-            <div class="camera-setting">FOV: <span id="camera-fov">40°</span></div>
-            <div class="camera-setting">Near/Far: <span id="camera-clip">1/100</span></div>
-            <div class="camera-setting">Detection Rate: <span id="detection-rate">60fps</span></div>
-            <div class="camera-setting">Aspect Ratio: <span id="camera-aspect">1.78</span></div>
-            <div class="camera-setting">Zoom: <span id="camera-zoom">1</span></div>
-            <div class="camera-setting">Position: <span id="camera-pos">0,0,0</span></div>
-            <div class="camera-setting">Rotation: <span id="camera-rot">0,0,0</span></div>
-            <div class="camera-setting">Projection Matrix: <span id="camera-proj">...</span></div>
-        </div>
-    </div>
-    <div id="ar-container">
-        <a-scene 
-            embedded 
-            arjs="sourceType: webcam; 
-                  debugUIEnabled: false; 
-                  detectionMode: mono_and_matrix; 
-                  matrixCodeType: 3x3; 
-                  cameraParametersUrl: https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/data/camera_para.dat;
-                  maxDetectionRate: 60;
-                  sourceWidth: 720;
-                  sourceHeight: 720;
-                  displayWidth: 720;
-                  displayHeight: 720;">
-            <!-- Create a cube on top of the Hiro marker -->
-            <a-marker preset="hiro" id="marker">
-                <a-box 
-                    position="0 0 0" 
-                    rotation="0 0 0" 
-                    width="1" 
-                    height="1" 
-                    depth="1"
-                    material="color: #4CC3D9; metalness: 0.5; roughness: 0.5;"
-                    id="cube">
-                </a-box>
-            </a-marker>
-            <a-entity arjs-camera></a-entity>
-        </a-scene>
-    </div>
-    <script>
-        // Hide loading screen when scene is loaded
-        document.querySelector('a-scene').addEventListener('loaded', function() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('object-status').querySelector('span').textContent = 'true';
-            document.getElementById('object-status').classList.add('true');
-        });
-
-        // Track marker visibility
-        const marker = document.getElementById('marker');
-        const markerStatus = document.getElementById('marker-status');
-        const surfaceStatus = document.getElementById('surface-status');
-
-        marker.addEventListener('markerFound', function() {
-            markerStatus.querySelector('span').textContent = 'true';
-            markerStatus.classList.add('true');
-            markerStatus.classList.remove('false');
-        });
-
-        marker.addEventListener('markerLost', function() {
-            markerStatus.querySelector('span').textContent = 'false';
-            markerStatus.classList.add('false');
-            markerStatus.classList.remove('true');
-        });
-
-        // Track surface detection (using AR.js's plane detection)
-        const scene = document.querySelector('a-scene');
-        scene.addEventListener('ar-hit-test-select', function() {
-            surfaceStatus.querySelector('span').textContent = 'true';
-            surfaceStatus.classList.add('true');
-            surfaceStatus.classList.remove('false');
-        });
-
-        // Update camera info periodically
-        setInterval(function() {
-            const camera = document.querySelector('[camera]');
-            if (camera) {
-                const cameraComponent = camera.getAttribute('camera');
-                const cameraObj = camera.object3D;
-                
-                // Update basic camera settings
-                document.getElementById('camera-fov').textContent = `${cameraComponent.fov}°`;
-                document.getElementById('camera-clip').textContent = `${cameraComponent.near}/${cameraComponent.far}`;
-                document.getElementById('camera-zoom').textContent = cameraComponent.zoom;
-                
-                // Update camera position and rotation
-                const pos = cameraObj.position;
-                const rot = cameraObj.rotation;
-                document.getElementById('camera-pos').textContent = 
-                    `${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}`;
-                document.getElementById('camera-rot').textContent = 
-                    `${(rot.x * 180/Math.PI).toFixed(2)}°, ${(rot.y * 180/Math.PI).toFixed(2)}°, ${(rot.z * 180/Math.PI).toFixed(2)}°`;
-                
-                // Update projection matrix
-                const projMatrix = cameraObj.projectionMatrix.elements;
-                document.getElementById('camera-proj').textContent = 'Matrix Loaded';
-                
-                // Log complete camera settings to console
-                console.log('Camera Settings:', {
-                    fov: cameraComponent.fov,
-                    near: cameraComponent.near,
-                    far: cameraComponent.far,
-                    zoom: cameraComponent.zoom,
-                    position: { x: pos.x, y: pos.y, z: pos.z },
-                    rotation: { 
-                        x: rot.x * 180/Math.PI, 
-                        y: rot.y * 180/Math.PI, 
-                        z: rot.z * 180/Math.PI 
-                    },
-                    projectionMatrix: projMatrix
-                });
-            }
-        }, 1000);
-    </script>
-</body>
-</html> 
+      }
+      </script>
+      <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Google+Sans+Text">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+<link rel="stylesheet" href="index.css">
+<script src="index.tsx" type="module"></script>
